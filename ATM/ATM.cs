@@ -33,40 +33,72 @@ namespace ATM
         public void Run()
             {
             WriteLine("Welcome to the ATM!");
+            while (true)
 
-            WriteLine("Are you a new user or an existing user? (N for new / E for existing)");
-            string userChoice = ReadLine().ToUpper();
+                {
 
-            User currentUser;
-            bool loginSuccess = false;
-            if (userChoice == "N")
-                {
-                currentUser = CreateUser();
-                loginSuccess = true; // Assuming successful registration
-                }
-            else if (userChoice == "E")
-                {
-                WriteLine("Please enter your username:");
-                string username = ReadLine();
-                WriteLine("Please enter your password:");
-                string password = ReadLine();
+                WriteLine("Are you a new user or an existing user, or wish to exit? (N for new / E for existing / X for exit the program)");
+                string userChoice = ReadLine().ToUpper();
 
-                currentUser = AuthenticateUser(username, password);
-                loginSuccess = currentUser != null;
-                }
-            else
-                {
-                WriteLine("Invalid choice.");
-                return;
-                }
+                switch (userChoice)
+                    {
+                    case "N":
+                        User newUser = CreateUser();
+                        if (newUser != null)
+                            {
+                            PerformATMOperations(newUser);
+                            }
 
-            if (loginSuccess)
-                {
-                PerformATMOperations(currentUser);
-                }
-            else
-                {
-                WriteLine("Login failed.");
+                        break;
+
+                    case "E":
+                        WriteLine("Please enter your username:");
+                        string username = ReadLine();
+                        WriteLine("Please enter your password:");
+                        string password = ReadLine();
+
+                        User currentUser = AuthenticateUser(username, password);
+                        if (currentUser != null)
+                            {
+
+                            bool loginSuccess = currentUser.Login(password);
+
+                            if (loginSuccess)
+                                {
+                                PerformATMOperations(currentUser);
+                                }
+
+                            else
+                                {
+                                if (currentUser.Card.IsBlocked)
+                                    {
+                                    WriteLine("Your card has been blocked due to multiple failed login attempts.");
+                                    return;
+                                    }
+                                else
+                                    {
+                                    WriteLine($"Login failed. You have {currentUser.RemainingAttempts} attempts left before the card is blocked.");
+                                    }
+                                }
+                            }
+                        else
+                            {
+                            WriteLine("User not found. Please try again or choose a different option.");
+
+                            }
+
+                        break;
+
+                    case "X":
+                        WriteLine("Thank you for using the ATM. Goodbye!");
+                        return;
+                    default:
+                        WriteLine("Invalid choice. Please try again.");
+                        break;
+                    }
+
+
+
                 }
             }
 
@@ -120,18 +152,50 @@ namespace ATM
         private User AuthenticateUser(string? username, string? password)
             {
             User user = users.Find(u => u.Username == username);
-            if (user != null && user.Login(password))
+            if (user != null)
                 {
-                return user;
+
+                bool loginSuccess = user.Login(password);
+
+                if (loginSuccess)
+                    {
+                    return user;
+                    }
+                else
+                    {
+
+                    if (user.Card.IsBlocked)
+                        {
+                        WriteLine("Your card has been blocked due to multiple failed login attempts.");
+                        }
+                    else
+                        {
+                        WriteLine($"Login failed. You have {user.RemainingAttempts} attempts left before your card is blocked.");
+                        }
+                    }
                 }
+            else
+                {
+                WriteLine("User not found. Please try again or choose a different option.");
+                }
+
             return null;
             }
+
+
+
 
 
         private User CreateUser()
             {
             WriteLine("Enter new username:");
             string username = ReadLine();
+            if (users.Any(u => u.Username.Equals(username, StringComparison.OrdinalIgnoreCase)))
+                {
+                WriteLine("This username already exists. Please choose a different username.");
+                return null;
+                }
+
             WriteLine("Enter new password:");
             string password = ReadLine();
 
@@ -250,20 +314,19 @@ namespace ATM
             }
 
 
-        private bool Login(Guid cardNumber, string password)
+        private bool Login(string username, string password)
             {
-            // Find the user based on the card number
-            User user = users.Find(u => u.Card.CardNumber == cardNumber);
+            User user = users.Find(u => u.Username == username);
 
             if (user != null)
                 {
-                // Now, call the user's Login method to verify the password
+                int remainingAttempts;
                 return user.Login(password);
                 }
 
-            // If no user with that card number is found, return false
             return false;
             }
+
 
         private bool VerifyCard(Guid cardNumber)
             {

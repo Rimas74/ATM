@@ -4,46 +4,61 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Transactions;
+using Newtonsoft.Json;
 using static System.Console;
 
 namespace ATM
     {
     public class User
         {
+        private const int MaxLoginAttempts = 3;
         private List<Transaction> transactions;
+
+        [JsonProperty]
+        public int RemainingAttempts { get; private set; } = MaxLoginAttempts;
+
         public Card Card { get; }
         public string Username { get; private set; }
         public string Password { get; private set; }
         public decimal Balance { get; set; }
         public int LoginAttempts { get; private set; }
 
-        public User(Card card, string username, string password)
+        [JsonConstructor]
+        public User(Card card, string username, string password, int remainingAttempts = MaxLoginAttempts, bool isBlocked = false)
             {
             Card = card;
             Username = username;
             Password = password;
             Balance = 0;
             LoginAttempts = 0;
+            Card.IsBlocked = isBlocked;
             transactions = new List<Transaction>();
 
             }
 
         public bool Login(string password)
             {
-            WriteLine($"Entered password: {password}");
-            WriteLine($"Actual password: {Password}");
-            WriteLine($"Card is blocked: {Card.IsBlocked}");
 
-            if (!Card.IsBlocked && password == Password)
+            if (Card.IsBlocked)
+                {
+                WriteLine($"Card is blocked.");
+
+                return false;
+                }
+
+            if (password == Password)
                 {
                 LoginAttempts = 0;
+                RemainingAttempts = MaxLoginAttempts;
                 return true;
                 }
+
             else
                 {
                 LoginAttempts++;
-                WriteLine($"Login failed. Attempts: {LoginAttempts}, Card Blocked: {Card.IsBlocked}");
-                if (LoginAttempts > 10)
+                RemainingAttempts = MaxLoginAttempts - LoginAttempts;
+
+                if (LoginAttempts >= MaxLoginAttempts)
                     {
                     BlockCard();
                     }
@@ -51,6 +66,7 @@ namespace ATM
                 return false;
                 }
             }
+
 
         private void BlockCard()
             {
@@ -99,3 +115,4 @@ namespace ATM
             }
         }
     }
+
