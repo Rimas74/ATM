@@ -10,6 +10,6 @@ namespace ATM
         {
         Withdrawal,
         Deposit,
-        BalanceInquiry
+
         }
     }
