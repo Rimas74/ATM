@@ -65,7 +65,7 @@ namespace ATM
                 LoginAttempts++;
                 RemainingAttempts = MaxLoginAttempts - LoginAttempts;
 
-                if (LoginAttempts >= MaxLoginAttempts)
+                if (LoginAttempts > MaxLoginAttempts)
                     {
                     BlockCard();
                     }

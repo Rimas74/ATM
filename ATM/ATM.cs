@@ -185,9 +185,6 @@ namespace ATM
             }
 
 
-
-
-
         private User CreateUser()
             {
             WriteLine("Enter new username:");
@@ -214,7 +211,7 @@ namespace ATM
             {
             Write("Please enter your password: ");
             string enteredPassword = ReadLine()!;
-            WriteLine($"Password entered: {enteredPassword} ");
+            //WriteLine($"Password entered: {enteredPassword} ");
             return enteredPassword;
             }
         private void WithdrawMoney(User user)
@@ -269,7 +266,6 @@ namespace ATM
             {
             fileManager.WriteUserData(users);
             }
-
 
 
         private bool CheckDailyTransactionLimit(Guid cardNumber)
