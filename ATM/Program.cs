@@ -5,12 +5,6 @@ namespace ATM
         {
         static void Main(string[] args)
             {
-            //Guid cardNumber = Guid.NewGuid();
-            //Card newCard = new Card(cardNumber);
-
-            //string newPassword = "Zigmas1974!";
-
-            //User newUser = new User(newCard, newPassword);
 
             ATM atm = new ATM();
             atm.Run();
