@@ -15,6 +15,7 @@ namespace ATM
         private FileManager fileManager;
         private Dictionary<Guid, int> dailyTransactionCount;
 
+
         public ATM()
             {
             users = new List<User>();
@@ -156,6 +157,7 @@ namespace ATM
                 {
 
                 bool loginSuccess = user.Login(password);
+                fileManager.WriteUserData(users);
 
                 if (loginSuccess)
                     {
@@ -163,16 +165,16 @@ namespace ATM
                     }
                 else
                     {
-
                     if (user.Card.IsBlocked)
                         {
-                        WriteLine("Your card has been blocked due to multiple failed login attempts.");
+                        WriteLine("Your card has been blocked due multiple failed attempts to login.");
                         }
                     else
                         {
                         WriteLine($"Login failed. You have {user.RemainingAttempts} attempts left before your card is blocked.");
                         }
                     }
+
                 }
             else
                 {

@@ -12,26 +12,33 @@ namespace ATM
     public class User
         {
         private const int MaxLoginAttempts = 3;
+
+
         private List<Transaction> transactions;
 
         [JsonProperty]
-        public int RemainingAttempts { get; private set; } = MaxLoginAttempts;
-
-        public Card Card { get; }
+        public int RemainingAttempts { get; private set; }
+        public bool IsCardBlocked => Card.IsBlocked;
+        [JsonProperty]
+        public Card Card { get; private set; }
+        [JsonProperty]
         public string Username { get; private set; }
+        [JsonProperty]
         public string Password { get; private set; }
+        [JsonProperty]
         public decimal Balance { get; set; }
         public int LoginAttempts { get; private set; }
 
         [JsonConstructor]
-        public User(Card card, string username, string password, int remainingAttempts = MaxLoginAttempts, bool isBlocked = false)
+        public User(Card card, string username, string password, int remainingAttempts = MaxLoginAttempts)
             {
             Card = card;
             Username = username;
             Password = password;
             Balance = 0;
             LoginAttempts = 0;
-            Card.IsBlocked = isBlocked;
+
+            RemainingAttempts = remainingAttempts;
             transactions = new List<Transaction>();
 
             }
@@ -41,8 +48,8 @@ namespace ATM
 
             if (Card.IsBlocked)
                 {
-                WriteLine($"Card is blocked.");
 
+                WriteLine("Your card is blocked");
                 return false;
                 }
 
