@@ -29,6 +29,11 @@ namespace ATM
         private void LoadUserData()
             {
             users = fileManager.ReadUserData();
+
+            foreach (var user in users)
+                {
+                user.InitializeDailyTransactions();
+                }
             }
 
         public void Run()
@@ -56,7 +61,7 @@ namespace ATM
                         WriteLine("Please enter your username:");
                         string username = ReadLine();
                         WriteLine("Please enter your password:");
-                        string password = ReadLine();
+                        string password = PromptForPassword();
 
                         User currentUser = AuthenticateUser(username, password);
                         if (currentUser != null)
@@ -87,7 +92,7 @@ namespace ATM
                             WriteLine("User not found. Please try again or choose a different option.");
 
                             }
-
+                        fileManager.WriteUserData(users);
                         break;
 
                     case "X":
@@ -157,23 +162,22 @@ namespace ATM
                 {
 
                 bool loginSuccess = user.Login(password);
-                fileManager.WriteUserData(users);
+                SaveUserData();
 
                 if (loginSuccess)
                     {
                     return user;
                     }
+
+                if (user.Card.IsBlocked)
+                    {
+                    WriteLine("Your card has been blocked due multiple failed attempts to login.");
+                    }
                 else
                     {
-                    if (user.Card.IsBlocked)
-                        {
-                        WriteLine("Your card has been blocked due multiple failed attempts to login.");
-                        }
-                    else
-                        {
-                        WriteLine($"Login failed. You have {user.RemainingAttempts} attempts left before your card is blocked.");
-                        }
+                    WriteLine($"Login failed. You have {user.RemainingAttempts} attempts left before your card is blocked.");
                     }
+
 
                 }
             else
@@ -196,7 +200,7 @@ namespace ATM
                 }
 
             WriteLine("Enter new password:");
-            string password = ReadLine();
+            string password = PromptForPassword();
 
             Guid newCardNumber = Guid.NewGuid();
             User newUser = new User(new Card(newCardNumber), username, password);
@@ -211,28 +215,22 @@ namespace ATM
             {
             Write("Please enter your password: ");
             string enteredPassword = ReadLine()!;
-            //WriteLine($"Password entered: {enteredPassword} ");
+            WriteLine($"Password entered: {enteredPassword} ");
             return enteredPassword;
             }
         private void WithdrawMoney(User user)
             {
-
             Write("Please enter the amount to withdraw: ");
-
             if (decimal.TryParse(ReadLine(), out decimal amount))
                 {
-
-                if (CheckDailyTransactionLimit(user.Card.CardNumber) && user.WithdrawMoney(amount))
+                if (user.CanPerformTransaction() && user.WithdrawMoney(amount))
                     {
                     WriteLine($"Withdrawal of {amount:C} successful.");
-                    IncrementDailyTransactionCount(user.Card.CardNumber);
-
-                    transactions.Add(new Transaction(TransactionType.Withdrawal, amount));
-
+                    SaveUserData();
                     }
                 else
                     {
-                    WriteLine($"Withdrawal failed. Insufficient funds or exceeded the withdrawal limit.");
+                    WriteLine("Withdrawal failed. Insufficient funds or exceeded the daily transaction limit.");
                     }
                 }
             else
@@ -240,17 +238,16 @@ namespace ATM
                 WriteLine("Invalid amount. Please enter a valid number.");
                 }
             }
+
         private void DepositMoney(User user)
             {
             Write("Please enter the amount to deposit: ");
             if (decimal.TryParse(ReadLine(), out decimal amount))
                 {
-
-
-                if (user.Deposit(amount))
+                if (user.CanPerformTransaction() && user.Deposit(amount))
                     {
                     WriteLine($"Deposit of {amount:C} successful.");
-                    IncrementDailyTransactionCount(user.Card.CardNumber);
+                    SaveUserData();
                     }
                 else
                     {
@@ -268,29 +265,7 @@ namespace ATM
             }
 
 
-        private bool CheckDailyTransactionLimit(Guid cardNumber)
-            {
-            if (dailyTransactionCount.TryGetValue(cardNumber, out int count))
-                {
-                return count < 10;
-                };
-            dailyTransactionCount[cardNumber] = 0;
-            return true;
 
-            }
-
-        private void IncrementDailyTransactionCount(Guid cardNumber)
-            {
-            if (dailyTransactionCount.ContainsKey(cardNumber))
-                {
-                dailyTransactionCount[cardNumber]++;
-                }
-            else
-                {
-                dailyTransactionCount[cardNumber] = 1;
-                }
-
-            }
 
         private void ShowTransactions(User user)
             {
@@ -312,23 +287,6 @@ namespace ATM
             }
 
 
-        private bool Login(string username, string password)
-            {
-            User user = users.Find(u => u.Username == username);
 
-            if (user != null)
-                {
-                int remainingAttempts;
-                return user.Login(password);
-                }
-
-            return false;
-            }
-
-
-        private bool VerifyCard(Guid cardNumber)
-            {
-            return true;
-            }
         }
     }
