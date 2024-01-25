@@ -113,7 +113,7 @@ namespace ATM
         public List<Transaction> ShowTransactions()
             {
             return Transactions.OrderByDescending(t => t.Timestamp).Take(5).ToList();
-            //return transactions.OrderByDescending(t => t.Timestamp).Take(5).ToList();
+
             }
 
         public bool WithdrawMoney(decimal amount)
