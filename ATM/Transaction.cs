@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 
 namespace ATM
     {
@@ -10,6 +12,7 @@ namespace ATM
         {
         public int TransactionId { get; }
         public DateTime Timestamp { get; }
+        [JsonConverter(typeof(StringEnumConverter))]
         public TransactionType Type { get; set; }
         public decimal Amount { get; set; }
 
