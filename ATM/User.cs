@@ -155,7 +155,7 @@ namespace ATM
             {
             Transaction transaction = new Transaction(type, amount);
             transactions.Add(transaction);
-            IncrementalTransactionCount();
+
             }
 
         }
