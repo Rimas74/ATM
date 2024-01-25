@@ -221,7 +221,7 @@ namespace ATM
         private void WithdrawMoney(User user)
             {
             Write("Please enter the amount to withdraw: ");
-            if (decimal.TryParse(ReadLine(), out decimal amount))
+            if ((decimal.TryParse(ReadLine(), out decimal amount)) && amount >= 0)
                 {
                 if (user.CanPerformTransaction() && user.WithdrawMoney(amount))
                     {
@@ -242,7 +242,7 @@ namespace ATM
         private void DepositMoney(User user)
             {
             Write("Please enter the amount to deposit: ");
-            if (decimal.TryParse(ReadLine(), out decimal amount))
+            if ((decimal.TryParse(ReadLine(), out decimal amount)) && amount >= 0)
                 {
                 if (user.CanPerformTransaction() && user.Deposit(amount))
                     {
