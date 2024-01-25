@@ -218,7 +218,7 @@ namespace ATM
                 {
                 if (amount > 1000)
                     {
-                    WriteLine("The withdrawal amount exceeded the maximum limit.");
+                    WriteLine("Withdrawal failed. The withdrawal amount exceeded the maximum limit.");
                     return;
                     }
 
