@@ -60,7 +60,6 @@ namespace ATM
                     case "E":
                         WriteLine("Please enter your username:");
                         string username = ReadLine();
-                        WriteLine("Please enter your password:");
                         string password = PromptForPassword();
 
                         User currentUser = AuthenticateUser(username, password);
@@ -177,12 +176,6 @@ namespace ATM
                     {
                     WriteLine($"Login failed. You have {user.RemainingAttempts} attempts left before your card is blocked.");
                     }
-
-
-                }
-            else
-                {
-                WriteLine("User not found. Please try again or choose a different option.");
                 }
 
             return null;
@@ -221,8 +214,19 @@ namespace ATM
         private void WithdrawMoney(User user)
             {
             Write("Please enter the amount to withdraw: ");
-            if ((decimal.TryParse(ReadLine(), out decimal amount)) && amount >= 0)
+            if (decimal.TryParse(ReadLine(), out decimal amount))
                 {
+                if (amount > 1000)
+                    {
+                    WriteLine("The withdrawal amount exceeded the maximum limit.");
+                    return;
+                    }
+
+                if (amount < 0)
+                    {
+                    WriteLine("Invalid amount. Please enter a positive number.");
+                    return;
+                    }
                 if (user.CanPerformTransaction() && user.WithdrawMoney(amount))
                     {
                     WriteLine($"Withdrawal of {amount:C} successful.");
@@ -230,7 +234,7 @@ namespace ATM
                     }
                 else
                     {
-                    WriteLine("Withdrawal failed. Insufficient funds or exceeded the daily transaction limit.");
+                    WriteLine("Withdrawal failed. Insufficient funds.");
                     }
                 }
             else
@@ -242,8 +246,13 @@ namespace ATM
         private void DepositMoney(User user)
             {
             Write("Please enter the amount to deposit: ");
-            if ((decimal.TryParse(ReadLine(), out decimal amount)) && amount >= 0)
+            if (decimal.TryParse(ReadLine(), out decimal amount))
                 {
+                if (amount < 0)
+                    {
+                    WriteLine("Invalid amount. Please enter a positive number.");
+                    return;
+                    }
                 if (user.CanPerformTransaction() && user.Deposit(amount))
                     {
                     WriteLine($"Deposit of {amount:C} successful.");
