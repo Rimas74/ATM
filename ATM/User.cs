@@ -18,6 +18,13 @@ namespace ATM
 
         private List<Transaction> transactions;
         [JsonProperty]
+        public List<Transaction> Transactions
+            {
+            get { return transactions; }
+            set { transactions = value; }
+            }
+
+        [JsonProperty]
         public Dictionary<Guid, Dictionary<DateTime, int>> DailyTransactionCounts { get; private set; }
 
         [JsonProperty]
@@ -105,8 +112,8 @@ namespace ATM
 
         public List<Transaction> ShowTransactions()
             {
-
-            return transactions.OrderByDescending(t => t.Timestamp).Take(5).ToList();
+            return Transactions.OrderByDescending(t => t.Timestamp).Take(5).ToList();
+            //return transactions.OrderByDescending(t => t.Timestamp).Take(5).ToList();
             }
 
         public bool WithdrawMoney(decimal amount)
